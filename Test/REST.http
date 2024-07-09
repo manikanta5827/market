@@ -1,0 +1,190 @@
+POST http://localhost:3000/auth/salesEntry
+Content-Type: application/json
+
+[
+{
+    "Name":"J J",
+    "Item":"Allam",
+    "Bags":1,
+    "Weight":50,
+    "Cooly":10,
+    "Price":100,
+    "Amount":0,
+    "Date":"2024-06-29"
+},{
+    "Name":"K K",
+    "Item":"onion",
+    "Bags":1,
+    "Weight":100,
+    "Cooly":10,
+    "Price":50,
+    "Amount":0,
+    "Date":"2024-06-28"
+}
+]
+
+####
+POST http://localhost:3000/auth/createCustomer
+Content-Type: application/json
+
+[
+    {
+        "Name":"N R",
+        "Number":9876543211
+        
+    }
+]
+
+
+#####
+
+POST http://localhost:3000/auth/cashEntry
+Content-Type: application/json
+
+[
+    {
+        "Name":"J J",
+        "Amount":10000,
+        "cashType":"cash",
+        "Date":"2024-06-26"
+    },
+     {
+        "Name":"J J",
+        "Amount":2000,
+        "cashType":"phonepe",
+        "Date":"2024-06-26"
+    },
+     {
+        "Name":"J J",
+        "Amount":7000,
+        "cashType":"phonepe",
+        "Date":"2024-06-27"
+    },
+
+    {
+        "Name":"SVS",
+        "Amount":2000,
+        "cashType":"cash",
+        "Date":"2024-06-25"
+    },
+    {
+        "Name":"K K",
+        "cashType":"cash",
+        "Amount":2000,
+        "Date":"2024-06-26"
+    },
+    {
+        "Name":"K K",
+        "cashType":"cash",
+        "Amount":3000,
+        "Date":"2024-06-28"
+    }
+
+]
+
+####
+POST http://localhost:3000/auth/customerBills
+Content-Type: application/json
+
+{
+    "date":"2024-06-29"
+}
+
+####
+POST http://localhost:3000/auth/ownerBill
+Content-Type: application/json
+
+{
+    "date":"2024-07-09"
+}
+
+####
+POST http://localhost:3000/auth/customerBillRange
+Content-Type: application/json
+
+{
+    "Name":"K K",
+    "startDate":"2024-06-22",
+    "endDate":"2024-07-29"
+}
+
+####
+GET http://localhost:3000/auth/customers
+
+####
+PUT http://localhost:3000/auth/updateCustomerSales
+Content-Type: application/json
+
+{
+    "_id":"667fb1a49733f31560ee997e",
+    "Name":" Sri J J",
+    "Item":"Potato",
+    "Bags":10,
+    "Weight":50,
+    "Cooly":10,
+    "Price":20,
+    "Date":"2024-06-25"
+}
+
+
+#####
+
+
+DELETE http://localhost:3000/auth/deleteCustomerSales
+Content-Type: application/json
+
+{
+    "_id":"667fb1a49733f31560ee9989",
+    "Name":" Sri J J",
+    "Amount":3010
+}
+
+
+####
+
+GET http://localhost:3000/auth/customerBalanceReport
+
+###
+PUT http://localhost:3000/auth/updateCustomerDetails
+Content-Type: application/json
+
+{
+    "_id":"667fb18c9733f31560ee9971",
+    "Name":" Sri J J",
+    "Number":9849590437
+}
+
+
+####
+DELETE http://localhost:3000/auth/deleteCustomerDetails
+Content-Type: application/json
+
+{
+    "Name":"N R"
+}
+
+
+####
+PUT http://localhost:3000/auth/updateCustomerCash
+Content-Type: application/json
+
+{
+    "_id":"667fb1d84fbe96c08befac2e",
+    "Name":" Sri J J",
+    "cashType":"Google",
+    "Amount":5000,
+    "Date":"2024-06-26"
+}
+
+
+
+
+#####
+DELETE http://localhost:3000/auth/deleteCustomerCash
+Content-Type: application/json
+
+{
+    "_id":"667c4bdf263dd84b697ebb28",
+    "Name":"K K",
+    "Amount":4000
+}
