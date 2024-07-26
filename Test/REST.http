@@ -107,6 +107,8 @@ Content-Type: application/json
     "startDate":"2024-06-22",
     "endDate":"2024-07-29"
 }
+#####
+GET http:localhost:3000/auth/customer
 
 ####
 GET http://localhost:3000/auth/customers

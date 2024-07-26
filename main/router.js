@@ -9,7 +9,7 @@ const {
 } = require("../DB/dbSchema");
 const createError = require("http-errors");
 
-//customer Sales 
+//customer Sales
 
 /**
  * @swagger
@@ -66,16 +66,21 @@ router.post("/salesEntry", async (req, res, next) => {
   try {
     let array = req.body;
     for (let i = 0; i < array.length; i++) {
-     
-      if(!await customerBalance.findOne({Name:array[i].Name})){
-      return next(createError.Unauthorized(`Customer with Name ${array[i].Name} not found ...Create a new customer account`))
+      if (!(await customerBalance.findOne({ Name: array[i].Name }))) {
+        return next(
+          createError.Unauthorized(
+            `Customer with Name ${array[i].Name} not found ...Create a new customer account`
+          )
+        );
       }
-      if(!array[i].Price||!array[i].Item||!array[i].Name){
-        return next(createError.BadRequest("Invalid request body at index "+(i+1)));
+      if (!array[i].Price || !array[i].Item || !array[i].Name) {
+        return next(
+          createError.BadRequest("Invalid request body at index " + (i + 1))
+        );
       }
       array[i].Amount =
-        array[i].Price * (array[i].Weight||50) * (array[i].Bags||1) +
-        (array[i].Bags||1) * (array[i].Cooly||10);
+        array[i].Price * (array[i].Weight || 50) * (array[i].Bags || 1) +
+        (array[i].Bags || 1) * (array[i].Cooly || 10);
     }
     //  console.log(array);
     await customerSales.insertMany(array);
@@ -95,7 +100,7 @@ router.post("/salesEntry", async (req, res, next) => {
     //  console.log(names)
     //add this sales to every user balance and insert them into customer Balance
     const out = await customerBalance.find({ Name: { $in: names } });
-      //  console.log(out)
+    //  console.log(out)
     for (let i = 0; i < out.length; i++) {
       let object = out[i];
       object.Balance = object.Balance + users.get(object.Name);
@@ -106,7 +111,7 @@ router.post("/salesEntry", async (req, res, next) => {
     }
     res.status(200).send("Customer sales Inserted successfully");
   } catch (error) {
-     console.log(error);
+    console.log(error);
     next(createError.Unauthorized(error));
   }
 });
@@ -160,7 +165,13 @@ router.post("/salesEntry", async (req, res, next) => {
 
 router.put("/updateCustomerSales", async (req, res, next) => {
   try {
-    if (!req.body||!req.body._id||!req.body.Name||!req.body.Item||!req.body.Price) {
+    if (
+      !req.body ||
+      !req.body._id ||
+      !req.body.Name ||
+      !req.body.Item ||
+      !req.body.Price
+    ) {
       throw createError.Unauthorized("Details not found");
     }
     const data = req.body;
@@ -168,12 +179,14 @@ router.put("/updateCustomerSales", async (req, res, next) => {
     const Name = data.Name;
     const updateData = {
       Item: data.Item,
-      Bags: (data.Bags||1),
-      Weight: (data.Weight||50),
-      Cooly: (data.Cooly||10),
+      Bags: data.Bags || 1,
+      Weight: data.Weight || 50,
+      Cooly: data.Cooly || 10,
       Price: data.Price,
-      Amount: data.Price * (data.Weight||50) * (data.Bags||1) + (data.Bags||1) * (data.Cooly||10),
-      Date: (data.Date||Date.now()),
+      Amount:
+        data.Price * (data.Weight || 50) * (data.Bags || 1) +
+        (data.Bags || 1) * (data.Cooly || 10),
+      Date: data.Date || Date.now(),
     };
 
     const object = await customerSales.find(
@@ -213,7 +226,7 @@ router.put("/updateCustomerSales", async (req, res, next) => {
  *             properties:
  *               _id:
  *                 type: string
- *                 example: The ID of the sales record to delete - 668cdb46656fd7ed300228d8.              
+ *                 example: The ID of the sales record to delete - 668cdb46656fd7ed300228d8.
  *     responses:
  *       200:
  *         description: Successfully deleted customer sales entry and updated balance.
@@ -227,12 +240,12 @@ router.delete("/deleteCustomerSales", async (req, res, next) => {
       throw createError.Unauthorized("Details not found");
     }
     const id = req.body._id;
-    
+
     // by using id we can delete entry in sales
-  const data= await customerSales.findByIdAndDelete(id)
-  const Name=data.Name;
-  const Amount=data.Amount;
-      
+    const data = await customerSales.findByIdAndDelete(id);
+    const Name = data.Name;
+    const Amount = data.Amount;
+
     // by using name we can alter the balance of customer
     const obj = await customerBalance.find({ Name: Name });
     const oldBalance = obj[0].Balance;
@@ -242,10 +255,9 @@ router.delete("/deleteCustomerSales", async (req, res, next) => {
     res.send("Sales with Id Deleted successfully.");
   } catch (error) {
     console.log(error);
-    next(createError.Unauthorized('Sales with Id not Found'));
+    next(createError.Unauthorized("Sales with Id not Found"));
   }
 });
-
 
 ////Customer Cash
 /**
@@ -292,21 +304,25 @@ router.delete("/deleteCustomerSales", async (req, res, next) => {
 router.post("/cashEntry", async (req, res, next) => {
   try {
     if (!req.body) {
-      next(createError.Unauthorized('Missing Body'))
+      next(createError.Unauthorized("Missing Body"));
     }
     let array = req.body;
     //Group them
     for (let i = 0; i < array.length; i++) {
       let object = array[i];
-      if(!await customerBalance.findOne({Name:object.Name})){
-        return next(createError.Unauthorized(`Customer with Name ${array[i].Name} not found ...Create a new customer account`))
-        }
+      if (!(await customerBalance.findOne({ Name: object.Name }))) {
+        return next(
+          createError.Unauthorized(
+            `Customer with Name ${array[i].Name} not found ...Create a new customer account`
+          )
+        );
+      }
       //cash table update
       let obj = {
         Name: object.Name,
         Amount: object.Amount,
-        cashType: (object.cashType||"cash"),
-        Date: (object.Date||Date.now())
+        cashType: object.cashType || "cash",
+        Date: object.Date || Date.now(),
       };
       object = new customerCash(obj);
       await object.save();
@@ -389,16 +405,16 @@ router.post("/cashEntry", async (req, res, next) => {
 
 router.put("/updateCustomerCash", async (req, res, next) => {
   try {
-    if (!req.body||!req.body.Name||!req.body.Amount) {
-      next(createError.Unauthorized("Missing request body"))
+    if (!req.body || !req.body.Name || !req.body.Amount) {
+      next(createError.Unauthorized("Missing request body"));
     }
     let data = req.body;
     const id = data._id;
     const Name = data.Name;
     const updateData = {
-      cashType: (data.cashType||"cash"),
+      cashType: data.cashType || "cash",
       Amount: data.Amount,
-      Date: (data.Date||Date.now()),
+      Date: data.Date || Date.now(),
     };
     const object = await customerCash.find({ _id: id }, { Amount: 1 });
     const oldAmount = object[0].Amount;
@@ -436,7 +452,7 @@ router.put("/updateCustomerCash", async (req, res, next) => {
  *               _id:
  *                 type: string
  *                 example: The ID of the cash transaction to delete - 668d0ca66bbde7d1db7b4758
- *               
+ *
  *     responses:
  *       200:
  *         description: Cash transaction deleted successfully.
@@ -456,12 +472,12 @@ router.put("/updateCustomerCash", async (req, res, next) => {
 router.delete("/deleteCustomerCash", async (req, res, next) => {
   try {
     if (!req.body) {
-      next(createError.Unauthorized("Missing request body"))
+      next(createError.Unauthorized("Missing request body"));
     }
     const id = req.body._id;
-   const data= await customerCash.findByIdAndDelete(id);
-   const Name=data.Name;
-   const Amount=data.Amount;
+    const data = await customerCash.findByIdAndDelete(id);
+    const Name = data.Name;
+    const Amount = data.Amount;
     // by using name we can alter the balance of customer
     const obj = await customerBalance.find({ Name: Name });
     const oldBalance = obj[0].Balance;
@@ -529,7 +545,6 @@ router.post("/customerBills", async (req, res, next) => {
           _id: "$Name",
           Sales: {
             $push: {
-             
               Item: "$Item",
               Bags: "$Bags",
               Weight: "$Weight",
@@ -714,46 +729,44 @@ router.post("/customerBills", async (req, res, next) => {
     }
     // console.log([...opBalance]);
     //printing the sales bill of all users on particular date
-    let response=[];
+    let response = [];
     for (let i = 0; i < commonElements.length; i++) {
       let name = commonElements[i];
 
       let TotalSales = 0;
       let Cash = 0;
-      let Balance=0;
-      
-        let object={
-          Date:date,
-          Name:name
-        }
-     console.log(object)
+      let Balance = 0;
+
+      let object = {
+        Date: date,
+        Name: name,
+      };
+      console.log(object);
       //sales print
       if (users.includes(name)) {
         let obj = salesListMap.get(name);
 
-        object.Items=obj.Sales;
-        TotalSales=obj.Total
-        object.TotalSales = TotalSales; 
+        object.Items = obj.Sales;
+        TotalSales = obj.Total;
+        object.TotalSales = TotalSales;
       }
-      console.log(object)
+      console.log(object);
       // console.log("OPBalance : " + opBalance.get(name));
       //cash Given
-      object.BF=opBalance.get(name);
+      object.BF = opBalance.get(name);
       if (cashListMap.has(name)) {
         let obj = cashListMap.get(name);
         Cash = obj.Amount;
         object.cash = obj.cash;
-        
       }
-      console.log(object)
-      
-      object.Balance=object.BF+TotalSales-Cash;
+      console.log(object);
+
+      object.Balance = object.BF + TotalSales - Cash;
       // console.log("Balance :" + (opBalance.get(name) + TotalSales - cash));
 
-     console.log(object);
+      console.log(object);
       response.push(object);
       console.log(response);
-
     }
 
     res.send(response);
@@ -980,7 +993,7 @@ router.post("/ownerBill", async (req, res, next) => {
         Amount: object.totalCash,
       });
     }
-    let array=[];
+    let array = [];
     for (let i = 0; i < commonElements.length; i++) {
       let name = commonElements[i];
       let cash = 0;
@@ -992,15 +1005,14 @@ router.post("/ownerBill", async (req, res, next) => {
       let BaF = opBalance.get(name) - cash;
       let sales = salesListMap.get(name);
       let Total = BaF + sales;
-      let object={
-        Date:date,
-        Name:name,
-        Sales:sales,
-        BF:BaF,
-        Total:Total
-      }
-      array.push(object)
-
+      let object = {
+        Date: date,
+        Name: name,
+        Sales: sales,
+        BF: BaF,
+        Total: Total,
+      };
+      array.push(object);
     }
 
     res.send(array);
@@ -1246,7 +1258,7 @@ router.post("/customerBillRange", async (req, res, next) => {
       return balance - sales + cash;
     }
     opB = opBalance(balance, cashAll, salesAll);
-    console.log("open balance ; "+opB)
+    console.log("open balance ; " + opB);
     const differenceInMs = endDate - startDate;
     const differenceInDays = Math.floor(differenceInMs / (1000 * 60 * 60 * 24));
 
@@ -1257,35 +1269,34 @@ router.post("/customerBillRange", async (req, res, next) => {
     // console.log(date, past);
     console.log();
     console.log("  SRI   " + Name);
-    let array=[];
-    
+    let array = [];
+
     for (let i = 0; i < differenceInDays + 1; i++) {
-      
       // console.log(date, past);
       let cdate = date.toISOString().slice(0, 10);
       let cpast = past.toISOString().slice(0, 10);
       if (salesListMap.has(cdate) || cashListMap.has(cpast)) {
-        let object={
-          Name:Name,
-          Date:cdate
-        }
+        let object = {
+          Name: Name,
+          Date: cdate,
+        };
         let salesAmount = 0;
         let cashAmount = 0;
         if (salesListMap.has(cdate)) {
           obj = salesListMap.get(cdate);
           salesAmount = obj.Amount;
-          object.Sales=obj.sales
-          object.TotalSales=salesAmount;
+          object.Sales = obj.sales;
+          object.TotalSales = salesAmount;
         }
-        object.BF=opB;
+        object.BF = opB;
         if (cashListMap.has(cpast)) {
           obj = cashListMap.get(cpast);
           cashAmount = obj.Amount;
-          object.Cash=obj.cash;
+          object.Cash = obj.cash;
         }
-        opB=opB - cashAmount + salesAmount;
-        object.Balance=opB;
-       array.push(object);
+        opB = opB - cashAmount + salesAmount;
+        object.Balance = opB;
+        array.push(object);
       }
       date.setDate(date.getDate() + 1);
       past.setDate(past.getDate() + 1);
@@ -1297,7 +1308,6 @@ router.post("/customerBillRange", async (req, res, next) => {
     next(createError.Unauthorized(error));
   }
 });
-
 
 //customers Info
 
@@ -1326,7 +1336,7 @@ router.post("/customerBillRange", async (req, res, next) => {
  *                   type: string
  *                   description: The contact number of the customer.
  *                   example: 1234567890
- *                 
+ *
  *     responses:
  *       200:
  *         description: Success
@@ -1335,22 +1345,25 @@ router.post("/customerBillRange", async (req, res, next) => {
  */
 router.post("/createCustomer", async (req, res, next) => {
   try {
-
     //check if request body is empty
-    if(!req.body[0]||(req.body.Name===""||req.body.Number==="")){
-      return next(createError.Unauthorized("Invalid request body"))
+    if (!req.body[0] || req.body.Name === "" || req.body.Number === "") {
+      return next(createError.Unauthorized("Invalid request body"));
     }
     let user = req.body[0];
     let customer = {
       Name: user.Name,
       Number: user.Number,
     };
-     //check if user exists with that Name
-     const data = await customerDetails.find({ Name: user.Name });
-     if (data[0]) {
-       // console.log('Customer not found')
-       return  next(createError.Unauthorized("Customer found with Existing Name Choose another Name"))
-     }
+    //check if user exists with that Name
+    const data = await customerDetails.find({ Name: user.Name });
+    if (data[0]) {
+      // console.log('Customer not found')
+      return next(
+        createError.Unauthorized(
+          "Customer found with Existing Name Choose another Name"
+        )
+      );
+    }
 
     //saving new customer
     let newCustomer = new customerDetails(customer);
@@ -1402,7 +1415,7 @@ router.post("/createCustomer", async (req, res, next) => {
  *                   Number:
  *                     type: number
  *                     description: The phone number of the customer.
- *                  
+ *
  *       401:
  *         description: Unauthorized
  */
@@ -1464,7 +1477,7 @@ router.put("/updateCustomerDetails", async (req, res, next) => {
     // console.log('stage 1')
     if (!req.body) {
       // console.log('error form server side')
-      next(createError.Unauthorized("Missing request body"))
+      next(createError.Unauthorized("Missing request body"));
     }
     // console.log('stage 2')
     const data = req.body;
@@ -1472,14 +1485,14 @@ router.put("/updateCustomerDetails", async (req, res, next) => {
     const oldUser = await customerDetails.findById(data._id);
     //check if user exist
     if (!oldUser) {
-       next(createError.Unauthorized("User not found"))
+      next(createError.Unauthorized("User not found"));
     }
     // console.log(oldUser);
-    if(data.Name===""){
-      data.Name=oldUser.Name;
+    if (data.Name === "") {
+      data.Name = oldUser.Name;
     }
-    if(data.Number===""){
-      data.Number=oldUser.Number;
+    if (data.Number === "") {
+      data.Number = oldUser.Number;
     }
     //update user details
     await customerDetails.findByIdAndUpdate(data._id, data);
@@ -1544,7 +1557,7 @@ router.put("/updateCustomerDetails", async (req, res, next) => {
  */
 router.delete("/deleteCustomerDetails", async (req, res, next) => {
   try {
-    if (!req.body||!req.body.Name) {
+    if (!req.body || !req.body.Name) {
       throw createError.Unauthorized("Missing request body");
     }
     const Name = req.body.Name;
@@ -1604,14 +1617,14 @@ router.get("/customerBalanceReport", async (req, res, next) => {
       { _id: 0, __v: 0 }
     );
 
-    if(customerBalanceList.length<1){
+    if (customerBalanceList.length < 1) {
       // console.log('Hii')
-       return next(createError.ServiceUnavailable('No data available'))
+      return next(createError.ServiceUnavailable("No data available"));
     }
     res.send(customerBalanceList);
   } catch (error) {
-    // console.log(error);
-    next(createError.Unauthorized('Fetching customer balance failed'));
+    console.log(error);
+    next(createError.Unauthorized("Fetching customer balance failed"));
   }
 });
 
